@@ -1,14 +1,12 @@
-console.log("PUTAAAAA");
-
 function $$(selector, context = document) {
   return Array.from(context.querySelectorAll(selector));
 }
 
 let pages = [
-  { url: ".", title: "Home" },
-  { url: "projects", title: "Projects" },
-  { url: "resume", title: "Resume" },
-  { url: "contact", title: "Contact" },
+  { url: "./my-portfolio", title: "Home" },
+  { url: "./my-portfolio/projects", title: "Projects" },
+  { url: "./my-portfolio/resume", title: "Resume" },
+  { url: "./my-portfolio/contact", title: "Contact" },
   { url: "https://github.com/mass-ave", title: "GitHub" },
 ];
 
