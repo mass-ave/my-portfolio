@@ -1,9 +1,11 @@
+console.log("PUTAAAAA");
+
 function $$(selector, context = document) {
   return Array.from(context.querySelectorAll(selector));
 }
 
 let pages = [
-  { url: "", title: "Home" },
+  { url: ".", title: "Home" },
   { url: "projects", title: "Projects" },
   { url: "resume", title: "Resume" },
   { url: "contact", title: "Contact" },

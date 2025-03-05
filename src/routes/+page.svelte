@@ -1,6 +1,3 @@
-<svelte:head>
-  <title>Kevin Acevedo</title>
-</svelte:head>
 <h1>Kevin Acevedo</h1>
 <p>
   Hi! I am a Senior at MIT studying Computer Science (6-3) and currently
