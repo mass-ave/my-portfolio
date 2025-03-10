@@ -8,7 +8,8 @@
         { url: "https://github.com/mass-ave", title: "GitHub" },
     ];
 
- 	let colorScheme = "light dark";
+  let localStorage = globalThis.localStorage ?? {};
+  let colorScheme = localStorage.colorScheme ?? "light dark";
  	let root = globalThis?.document?.documentElement;
  	$: root?.style.setProperty("color-scheme", colorScheme);
 </script>
