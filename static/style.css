@@ -5,40 +5,6 @@ body {
   padding: 1em;
 }
 
-nav ul,
-nav li {
-  display: contents;
-}
-
-nav {
-  display: flex;
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
-  border-bottom-color: oklch(50% 10% 200 / 40%);
-}
-
-nav a {
-  flex: 1;
-  text-decoration: none;
-  color: inherit;
-  text-align: center;
-  padding: 0.5em;
-}
-
-nav a.current {
-  border-bottom-width: 0.4em;
-  border-bottom-style: solid;
-  border-bottom-color: var(--color-accent);
-  padding-bottom: 0.5em;
-}
-
-nav a:hover {
-  border-bottom-width: 0.4em;
-  border-bottom-style: solid;
-  border-bottom-color: var(--color-accent);
-  background-color: color-mix(in oklch, var(--color-accent), canvas 85%);
-}
-
 img {
   max-width: 100%;
   height: auto;
@@ -48,12 +14,6 @@ form {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 1em;
-}
-
-input,
-textarea,
-button {
-  font: inherit;
 }
 
 label,
@@ -157,15 +117,6 @@ h1 {
 
 .experience-image:hover {
   color: var(--color-accent);
-}
-
-.color-scheme {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  font-size: 75%;
-  display: inline-flex;
-  gap: 0.5em;
 }
 
 :root {
