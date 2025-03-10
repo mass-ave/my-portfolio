@@ -14,7 +14,6 @@
  	$: root?.style.setProperty("color-scheme", colorScheme);
   $: localStorage.colorScheme = colorScheme;
 </script>
-{colorScheme}
 <label class="color-scheme">
     Theme:
    <select bind:value={ colorScheme }>
