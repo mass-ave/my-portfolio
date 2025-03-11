@@ -7,7 +7,7 @@
       <article>
         <p>
           <a href="https://www.mit.edu/" class="mit"
-            ><img src="../images/resume/mit.png" alt="MIT logo" />Massachusetts
+            ><img src="./images/resume/mit.png" alt="MIT logo" />Massachusetts
             Institute of Technology (MIT)</a
           >
         </p>
@@ -22,7 +22,7 @@
       <h2>Relevant Experience</h2>
       <div class="experience">
         <a href="https://www.amazon.com/" class="experience-image">
-          <img src="../images/resume/amazon.png" alt="Amazon" /><span
+          <img src="./images/resume/amazon.png" alt="Amazon" /><span
             >Amazon</span
           >
         </a>
@@ -30,7 +30,7 @@
       </div>
       <div class="experience">
         <a href="https://electionlab.mit.edu/" class="experience-image">
-          <img src="../images/resume/medsl.png" alt="MEDSL" /><span
+          <img src="./images/resume/medsl.png" alt="MEDSL" /><span
             >MIT Election Data + Science Lab</span
           >
         </a>
@@ -38,7 +38,7 @@
       </div>
       <div class="experience">
         <a href="https://www.bankofamerica.com/" class="experience-image">
-          <img src="../images/resume/bofa.png" alt="BofA" /><span
+          <img src="./images/resume/bofa.png" alt="BofA" /><span
             >Bank of America</span
           >
         </a>
