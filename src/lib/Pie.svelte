@@ -12,12 +12,17 @@
         arcs = arcData.map(d => arcGenerator(d));
     }
     let colors = d3.scaleOrdinal(d3.schemeTableau10);
+
+    export let selectedIndex = -1;
 </script>
 <div class="container">
     <svg viewBox="-50 -50 100 100">
         {#each arcs as arc, index}
-            <path d={ arc } fill={ colors(index) } />
+            <path d={arc} fill={ colors(index) }
+                class:selected={selectedIndex === index}
+                on:click={e => selectedIndex = selectedIndex === index ? -1 : index} />
         {/each}
+
     </svg>
     <ul class="legend">
         {#each data as d, index}
@@ -36,6 +41,35 @@
 
         /* Do not clip shapes outside the viewBox */
         overflow: visible;
+    }
+
+    svg:has(path:hover) path:not(:hover) {
+        opacity: 50%;
+    }
+
+    path {
+        transition: 300ms;
+        cursor: pointer;
+    }
+
+    path:hover {
+        opacity: 100% !important;
+    }
+
+    .selected {
+        --color: oklch(60% 45% 0) !important;
+        
+        &:is(path) {
+            fill: var(--color) !important;
+        }
+        
+        &:is(li) {
+            color: var(--color);
+        }
+    }
+
+    ul:has(.selected) li:not(.selected) {
+        color: gray;
     }
 
     .swatch {

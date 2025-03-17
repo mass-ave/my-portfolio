@@ -7,7 +7,6 @@
   import Pie from '$lib/Pie.svelte';
   import * as d3 from 'd3';
 
-
   let pieData;
   $: {
       pieData = {};
@@ -23,15 +22,23 @@
     return values.includes(query.toLowerCase());
   });
 
-
+  let selectedYearIndex = -1;
+  let selectedYear;
+  $: selectedYear = selectedYearIndex > -1 ? pieData[selectedYearIndex].label : null;
+  $: filteredByYear = filteredProjects.filter(project => {
+        if (selectedYear) {
+            return project.year === selectedYear;
+        }
+        return true;
+    });
 
 </script>
 <h1>{projects.length} Projects</h1>
-<Pie data={pieData}/>
+<Pie data={pieData} bind:selectedIndex={selectedYearIndex} />
 <input type="search" bind:value={query}
        aria-label="Search projects" placeholder="🔍 Search projects…" />
 <div class="projects">
-  {#each filteredProjects as p}
+  {#each filteredByYear as p}
   <Project data={p} />
   {/each}
 </div>
