@@ -9,7 +9,7 @@
   let data = fetch("https://api.github.com/users/mass-ave");
   onMount(async () => {
     try {
-      const response = await fetch("https://api.github.com/users/YOUR_USERNAME");
+      const response = await fetch("https://api.github.com/users/mass-ave");
       githubData = await response.json();
     } catch (err) {
       error = err;
