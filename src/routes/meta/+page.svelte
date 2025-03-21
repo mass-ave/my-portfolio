@@ -8,7 +8,7 @@
   let data = [];
 
   onMount(async () => {
-    data = await d3.csv("/loc.csv", row => ({
+    data = await d3.csv("$static/loc.csv", row => ({
       ...row,
       line: Number(row.line), // or just +row.line
       depth: Number(row.depth),
@@ -17,6 +17,7 @@
       datetime: new Date(row.datetime)
     }));
   });
+  console.log(data)
 </script>
 <h1>Meta</h1>
 <p>Total lines of code: {data.length}</p>
