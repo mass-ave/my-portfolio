@@ -17,7 +17,6 @@
       datetime: new Date(row.datetime)
     }));
   });
-  console.log(data)
 </script>
 <h1>Meta</h1>
 <p>Total lines of code: {data.length}</p>
