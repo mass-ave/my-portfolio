@@ -32,12 +32,12 @@
 {:else}
     <section>
         <h2>My GitHub Stats</h2>
-        <dl>
-            <dt>Followers</dt>
+        <dl class="stats">
+            <dt>Followers:</dt>
             <dd>{githubData.followers}</dd>
-            <dt>Following</dt>
+            <dt>Following:</dt>
             <dd>{githubData.following}</dd>
-            <dt>Public Repositories</dt>
+            <dt>Public Repositories:</dt>
             <dd>{githubData.public_repos}</dd>
         </dl>
     </section>
@@ -55,22 +55,6 @@
     max-width: 100ch;
     margin: 1em auto;
     text-align: center;
-  }
-
-  dl {
-    display: grid;
-    grid-template-columns: auto auto;
-    gap: 1em;
-  }
-
-  dt {
-    font-weight: bold;
-    text-align: right;
-  }
-
-  dd {
-    text-align: left;
-    margin: 0;
   }
 
   .error {

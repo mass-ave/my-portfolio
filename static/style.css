@@ -119,6 +119,36 @@ h1 {
   color: var(--color-accent);
 }
 
+.stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1em;
+  border-radius: 0.5em;
+  max-width: 100%;
+  margin: 0 auto;
+  border: 0.075em solid;
+}
+
+.stats dl {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 2em;
+}
+
+.stats dt {
+  display: inline;
+  font-weight: bold;
+}
+
+.stats dd {
+  display: inline;
+  margin-left: 0.25em;
+  margin-right: 1em;
+}
+
 :root {
   --color-accent: oklch(43.72% 0.1676 27.84);
   --border-gray: oklch(80% 3% 200);
