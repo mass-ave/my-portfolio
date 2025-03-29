@@ -4,7 +4,13 @@
 <script>
   import * as d3 from "d3";
   import { base } from '$app/paths';
+  import Bar from '$lib/Bar.svelte';
   import { onMount } from "svelte";
+  import {
+    computePosition,
+    autoPlacement,
+    offset,
+  } from '@floating-ui/dom';
 
   let data = [];
   let commits = [];
@@ -83,6 +89,46 @@
     );
   }
 
+  let hoveredIndex = -1;
+  $: hoveredCommit = commits[hoveredIndex] ?? hoveredCommit ?? {};
+
+  let commitTooltip;
+  let clickedCommits = [];
+  let cursor = {x: 0, y: 0};
+  let tooltipPosition = {x: 0, y: 0};
+  async function dotInteraction (index, evt) {
+    let hoveredDot = evt.target;
+    if (evt.type === "mouseenter") {
+      hoveredIndex = index;
+      cursor = {x: evt.x, y: evt.y};
+      tooltipPosition = await computePosition(hoveredDot, commitTooltip, {
+        strategy: "fixed",
+        middleware: [
+          offset(5),
+          autoPlacement()
+        ],
+      });
+    } else if (evt.type === "mouseleave") {
+      hoveredIndex = -1
+    } else if (evt.type === "click") {
+      let commit = commits[index]
+      if (!clickedCommits.includes(commit)) {
+        clickedCommits = [...clickedCommits, commit];
+      }
+      else {
+          clickedCommits = clickedCommits.filter(c => c !== commit);
+      }
+    }
+  }
+
+  $: allTypes = Array.from(new Set(data.map(d => d.type)));
+  $: selectedLines = (clickedCommits.length > 0 ? clickedCommits : commits).flatMap(d => d.lines);
+  $: selectedCounts = d3.rollup(
+      selectedLines,
+      v => v.length,
+      d => d.type
+  );
+  $: languageBreakdown = allTypes.map(type => [type, selectedCounts.get(type) || 0]);
 </script>
 <h1>Meta</h1>
 <dl class="stats">
@@ -93,6 +139,22 @@
   <dt>Number of authors:</dt>
 	<dd>{authors}</dd>
 </dl>
+<dl class="info tooltip" hidden={hoveredIndex === -1} bind:this={commitTooltip} style="top: {tooltipPosition.y}px; left: {tooltipPosition.x}px">
+	<dt>Commit</dt>
+	<dd><a href="{ hoveredCommit.url }" target="_blank">{ hoveredCommit.id }</a></dd>
+
+	<dt>Date</dt>
+	<dd>{ hoveredCommit.datetime?.toLocaleString("en", { dateStyle: "full" }) }</dd>
+
+	<dt>Time</dt>
+	<dd>{ hoveredCommit.datetime?.toLocaleTimeString("en", { timeStyle: "short" }) }</dd>
+
+	<dt>Author</dt>
+	<dd>{ hoveredCommit.author }</dd>
+
+	<dt>Lines Edited</dt>
+	<dd>{ hoveredCommit.totalLines }</dd>
+</dl>
 <svg viewBox="0 0 {width} {height}">
   <g transform="translate(0, {usableArea.bottom})" bind:this={xAxis} />
   <g transform="translate({usableArea.left}, 0)" bind:this={yAxis} />
@@ -100,6 +162,10 @@
 	<g class="dots">
     {#each commits as commit, index }
       <circle
+        on:mouseenter={evt => dotInteraction(index, evt)}
+        on:mouseleave={evt => dotInteraction(index, evt)}
+        on:click={ evt => dotInteraction(index, evt) }
+        class:selected={ clickedCommits.includes(commit) }
         cx={ xScale(commit.datetime) }
         cy={ yScale(commit.hourFrac) }
         r="5"
@@ -108,6 +174,7 @@
     {/each}
   </g>
 </svg>
+<Bar data={languageBreakdown} width={width} />
 <style>
 	svg {
 		overflow: visible;
@@ -116,5 +183,43 @@
 
   .gridlines {
     stroke-opacity: .2;
+  }
+
+  dl.info {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5em 1em;
+    margin: 0;
+    transition-duration: 500ms;
+    transition-property: opacity, visibility;
+
+    &[hidden]:not(:hover, :focus-within) {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
+
+  .tooltip {
+    position: fixed;
+    top: 1em;
+    left: 1em;
+    background: goldenrod;
+    padding: 1em;
+    max-width: 500px;
+    border-radius: 1em;
+    box-shadow: 6px 6px 3px rgba(128, 128, 128, 0.5);
+  }
+
+  circle {
+    transition: 200ms;
+    transform-origin: center;
+    transform-box: fill-box;
+    &:hover {
+      transform: scale(1.5);
+    }
+  }
+
+  .selected {
+    fill: var(--color-accent);
   }
 </style>
