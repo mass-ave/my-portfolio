@@ -2,11 +2,15 @@
   import * as d3 from "d3";
   import { base } from "$app/paths";
   import Bar from "$lib/Bar.svelte";
+  import StackedBar from "$lib/StackedBar.svelte";
+  import FileLines from "$lib/FileLines.svelte";
+  import Scrolly from "svelte-scrolly";
   import { onMount } from "svelte";
   import { computePosition, autoPlacement, offset } from "@floating-ui/dom";
 
   let data = [];
   let commits = [];
+  let colorScale = d3.scaleOrdinal(d3.schemeTableau10);
 
   onMount(async () => {
     data = await d3.csv(`${base}/loc.csv`, (row) => ({
@@ -45,13 +49,32 @@
         return ret;
       });
   });
+
+  let commitProgress = 100;
+  $: timeScale = d3.scaleTime(
+    d3.extent(commits, (d) => d.datetime),
+    [0, 100]
+  );
+
+  $: commitMaxTime = timeScale.invert(commitProgress);
+  $: dateTime = commitMaxTime.toLocaleString("en", {
+    dateStyle: "long",
+    timeStyle: "short",
+  });
+
+  $: filteredCommits = commits.filter(
+    (commit) => commit.datetime <= commitMaxTime
+  );
+
+  $: filteredLines = data.filter((dat) => dat.datetime <= commitMaxTime);
+
   const authors = d3.groups(data, (d) => d.author).length + 1;
 
   let width = 1000,
     height = 600;
 
-  $: minDate = d3.min(commits.map((d) => d.date));
-  $: maxDate = d3.max(commits.map((d) => d.date));
+  $: minDate = d3.min(filteredCommits.map((d) => d.date));
+  $: maxDate = d3.max(filteredCommits.map((d) => d.date));
   $: maxDatePlusOne = new Date(maxDate);
   $: maxDatePlusOne.setDate(maxDatePlusOne.getDate() + 1);
 
@@ -91,7 +114,7 @@
   }
 
   let hoveredIndex = -1;
-  $: hoveredCommit = commits[hoveredIndex] ?? hoveredCommit ?? {};
+  $: hoveredCommit = filteredCommits[hoveredIndex] ?? hoveredCommit ?? {};
 
   let commitTooltip;
   let clickedCommits = [];
@@ -109,7 +132,7 @@
     } else if (evt.type === "mouseleave") {
       hoveredIndex = -1;
     } else if (evt.type === "click") {
-      let commit = commits[index];
+      let commit = filteredCommits[index];
       if (!clickedCommits.includes(commit)) {
         clickedCommits = [...clickedCommits, commit];
       } else {
@@ -120,7 +143,7 @@
 
   $: allTypes = Array.from(new Set(data.map((d) => d.type)));
   $: selectedLines = (
-    clickedCommits.length > 0 ? clickedCommits : commits
+    clickedCommits.length > 0 ? clickedCommits : filteredCommits
   ).flatMap((d) => d.lines);
   $: selectedCounts = d3.rollup(
     selectedLines,
@@ -137,63 +160,86 @@
   <title>Meta</title>
 </svelte:head>
 <h1>Meta</h1>
-<dl class="stats">
-  <dt>Total <abbr title="Lines of code">LOC</abbr>:</dt>
-  <dd>{data.length}</dd>
-  <dt>Total # of commits:</dt>
-  <dd>{commits.length}</dd>
-  <dt>Number of authors:</dt>
-  <dd>{authors}</dd>
-</dl>
-<dl
-  class="info tooltip"
-  hidden={hoveredIndex === -1}
-  bind:this={commitTooltip}
-  style="top: {tooltipPosition.y}px; left: {tooltipPosition.x}px"
->
-  <dt>Commit</dt>
-  <dd><a href={hoveredCommit.url} target="_blank">{hoveredCommit.id}</a></dd>
+<Scrolly bind:progress={commitProgress}>
+  {#each commits as commit, index}
+    <p align="justify">
+      On {commit.datetime.toLocaleString("en", {
+        dateStyle: "full",
+        timeStyle: "short",
+      })},
+      {index === 0
+        ? "I made my first mark in the code, a small step that kicked things off. You can check it out "
+        : "I dropped another commit into the mix, part of the rhythm of this growing project. See it "}
+      <a href={commit.url} target="_blank">here</a>. It touched {commit.totalLines}
+      lines across {d3.rollups(
+        commit.lines,
+        (D) => D.length,
+        (d) => d.file
+      ).length} file(s). Just bits and pieces, edits and tweaks—but all part of the
+      story we're building, one commit at a time.
+    </p>
 
-  <dt>Date</dt>
-  <dd>{hoveredCommit.datetime?.toLocaleString("en", { dateStyle: "full" })}</dd>
-
-  <dt>Time</dt>
-  <dd>
-    {hoveredCommit.datetime?.toLocaleTimeString("en", { timeStyle: "short" })}
-  </dd>
-
-  <dt>Author</dt>
-  <dd>{hoveredCommit.author}</dd>
-
-  <dt>Lines Edited</dt>
-  <dd>{hoveredCommit.totalLines}</dd>
-</dl>
-<svg viewBox="0 0 {width} {height}">
-  <g transform="translate(0, {usableArea.bottom})" bind:this={xAxis} />
-  <g transform="translate({usableArea.left}, 0)" bind:this={yAxis} />
-  <g
-    class="gridlines"
-    transform="translate({usableArea.left}, 0)"
-    bind:this={yAxisGridlines}
-  />
-  <g class="dots">
-    {#each commits as commit, index}
-      <circle
-        on:mouseenter={(evt) => dotInteraction(index, evt)}
-        on:mouseleave={(evt) => dotInteraction(index, evt)}
-        on:click={(evt) => dotInteraction(index, evt)}
-        class:selected={clickedCommits.includes(commit)}
-        cx={xScale(commit.datetime)}
-        cy={yScale(commit.hourFrac)}
-        r="5"
-        fill="steelblue"
+    <hr />
+  {/each}
+  <svelte:fragment slot="viz">
+    <svg viewBox="0 0 {width} {height}">
+      <g transform="translate(0, {usableArea.bottom})" bind:this={xAxis} />
+      <g transform="translate({usableArea.left}, 0)" bind:this={yAxis} />
+      <g
+        class="gridlines"
+        transform="translate({usableArea.left}, 0)"
+        bind:this={yAxisGridlines}
       />
-    {/each}
-  </g>
-</svg>
-<Bar data={languageBreakdown} {width} />
+      <g class="dots">
+        {#each filteredCommits as commit, index (commit.id)}
+          <circle
+            on:mouseenter={(evt) => dotInteraction(index, evt)}
+            on:mouseleave={(evt) => dotInteraction(index, evt)}
+            on:click={(evt) => dotInteraction(index, evt)}
+            class:selected={clickedCommits.includes(commit)}
+            cx={xScale(commit.datetime)}
+            cy={yScale(commit.hourFrac)}
+            r="5"
+            fill="steelblue"
+          />
+        {/each}
+      </g>
+    </svg>
+    <StackedBar data={languageBreakdown} {width} {colorScale} />
+  </svelte:fragment>
+</Scrolly>
+
+<Scrolly bind:progress={commitProgress} --scrolly-layout="viz-first">
+  {#each commits as commit, index}
+    <p align="justify">
+      On {commit.datetime.toLocaleString("en", {
+        dateStyle: "full",
+        timeStyle: "short",
+      })}, I committed changes that impacted{" "}
+      {d3.rollups(
+        commit.lines,
+        (D) => D.length,
+        (d) => d.file
+      ).length}{" "}
+      file(s).
+    </p>
+    <hr />
+  {/each}
+  <svelte:fragment slot="viz">
+    <FileLines
+      lines={filteredLines}
+      {width}
+      svgWidth={0.8 * width}
+      {colorScale}
+    />
+  </svelte:fragment>
+</Scrolly>
 
 <style>
+  :global(body) {
+    max-width: min(120ch, 80vw);
+  }
+
   svg {
     overflow: visible;
     padding: 1em;
@@ -235,9 +281,20 @@
     &:hover {
       transform: scale(1.5);
     }
+    @starting-style {
+      r: 0;
+    }
   }
 
   .selected {
     fill: var(--color-accent);
+  }
+
+  .slider-container {
+    display: grid;
+    max-width: 500px;
+    display: flex;
+    flex: 1;
+    white-space: nowrap;
   }
 </style>
